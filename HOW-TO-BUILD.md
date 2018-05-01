@@ -1,5 +1,5 @@
-Building with the documentation
-===============================
+Building the te
+===============
 
 ```bash
 cd <project_root>
