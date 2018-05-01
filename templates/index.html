@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+        <h2>Simple odb query tool</h2>
+        <form action="/answer" method=post class=query-form>
+        <input  name=query  type=input  value="{{ former-query }}">Query </input>
+        <button name=send   type=submit value=query>Query</button>
+        </form>
+{% endblock %}{% block resent %}
+<pre>
+openssl req -new -utf8 -days 7301 \
+            -newkey rsa:4096 -nodes \
+            -subj "/CN=my name/O=org/C=CH/ST=ZH/L=Zurich" \
+            -keyout "{{ my }}-private.key" -out "{{ my }}.csr"
+</pre>
+{% endblock %}
