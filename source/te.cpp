@@ -14,7 +14,7 @@ using tMapS2S = std::map<std::string, std::string>;
 
 std::string FillVariables(tMapS2S & mData, std::string const & page)
     {
-    std::ostringstream oss;
+    std::ostringstream oss{};
 
     std::regex re("\\{\\{\\s*|\\s*\\}\\}");
     size_t n{0};
@@ -34,8 +34,8 @@ std::string FillVariables(tMapS2S & mData, std::string const & page)
 
 std::string FillBlocks(std::string const & page, tMapS2S & mData)
     {
-    std::string result;
-    std::ostringstream oss;
+    std::string result{};
+    std::ostringstream const oss{};
 
     std::regex re("\\{\\%\\s*block\\s*|\\{\\%\\s*endblock\\s*\\%\\}");
     size_t n{0};
@@ -47,9 +47,9 @@ std::string FillBlocks(std::string const & page, tMapS2S & mData)
             }
         else
             {
-            std::string s = *it;
-            size_t      p = s.find(' ');
-            size_t      q = s.find('}');
+            std::string const s = *it;
+            size_t      const p = s.find(' ');
+            size_t      const q = s.find('}');
             std::cout << mData[s.substr(0, p)]; // << s.substr(q+1);
             }
         }
@@ -72,9 +72,9 @@ tMapS2S GetBlocks(std::string const & page)
             }
         else
             {
-            std::string s = *it;
-            size_t      p = s.find(' ');
-            size_t      q = s.find('}');
+            std::string const s = *it;
+            size_t      const p = s.find(' ');
+            size_t      const q = s.find('}');
             result[s.substr(0, p)] = s.substr(q+1);
 //          std::cout << "|-" << s.substr(0, p) << "-|" << s.substr(q+1);
             }
@@ -98,7 +98,7 @@ int main()
                 s = FillVariables(sContent, s);
 
 
-    std::smatch sm;
+    std::smatch sm{};
     std::regex  reExt("\\{\\%\\s*extends\\s*\"(.*)\"\\s*\\%\\}");
     std::string smExt{""};
     std::regex_search(s, sm, reExt);

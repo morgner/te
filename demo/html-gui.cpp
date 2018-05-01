@@ -12,7 +12,7 @@
 
 using tMapS2S = std::map<std::string, std::string>;
 
-std::string FillVariables(tMapS2S & mData, std::string const & page)
+std::string FillVariables(tMapS2S const & mData, std::string const & page)
     {
     std::ostringstream oss;
 
