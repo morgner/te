@@ -1,21 +1,21 @@
 <!doctype html>
 <html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<title>{{ title }}</title>
-		<link rel=icon       type=image/x-icon href="{{ static+favicon-icon }}">
-		<link rel=stylesheet type=text/css     href="{{ static+style-css }}">
-	</head>
-	<body>
-            <p><div class=page>
-                <h1>ODB service tool</h1>
-                {% for message in messages %}<div class=flash>{{ message }}</div>
-                {% endfor %}
-{% block body %}{% endblock %}
-            </div></p>
-            <p><div class=page>
-                <h1>Sent</h1>
-{% block resent %}{% endblock %}
-		</div></p>
-	</body>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>{{ title }}</title>
+    <link rel=icon       type=image/x-icon href="{{ static+favicon-icon }}">
+    <link rel=stylesheet type=text/css     href="{{ static+style-css }}">
+    </head>
+    <body>
+        <p><div class=page>
+        <h1>ODB service tool</h1>
+        {% for message in messages %}<div class=flash>{{ message }}</div>
+        {% endfor %}
+        {% block body %}{% endblock %}
+        </div></p>
+        <p><div class=page>
+        <h1>Sent</h1>
+        {% block resent %}{% endblock %}
+        </div></p>
+    </body>
 </html>
