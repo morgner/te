@@ -5,6 +5,14 @@
                 <button name=send   type=submit value=query>Query</button>
                 </form>{% endblock %}{% block resent %}
                 <pre>
+
+            <h2>Search results</h2>
+            <ul>
+                {% for qresult in qresults %}<li>{{ qresult }}</li>
+                {% endfor %}</ul>
+            {% block body %}{% endblock %}
+            </div></p>
+
 openssl req -new -utf8 -days 7301 \
             -newkey rsa:4096 -nodes \
             -subj "/CN=my name/O=org/C=CH/ST=ZH/L=Zurich" \

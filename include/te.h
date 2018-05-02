@@ -6,8 +6,9 @@
 #include <algorithm>
 #include <iterator>
 #include <regex>
-#include <vector>
 #include <map>
+#include <vector>
+#include <utility>      // std::pair
 
 #include <string>       // std::string
 #include <streambuf>
@@ -15,6 +16,10 @@
 
 
 using TMapS2S = std::map<std::string, std::string>;
+using TMapS2V = std::map<std::string, std::vector<std::string>>;
+using TLpParm = std::pair<std::string, std::string>;
+
+using namespace std::string_literals;
 
 class CTE
     {
@@ -23,12 +28,12 @@ class CTE
 
 public:
 
-	CTE(TMapS2S & sContent, std::string const & crsFilename, std::string const & crsFilepath)
+	CTE(TMapS2S & sContent, TMapS2V & sLists, std::string const & crsFilename, std::string const & crsFilepath)
 	    : m_sFilepath(crsFilepath)
 	    {
 	    std::string s = ReadTemplate(m_sFilepath + crsFilename);
 
-    //+	s = FillLoops(s, sContent);
+            s = FillLoops(s, sLists);
 	    s = FillVariables(s, sContent);
 
 	    std::smatch      sm{};
@@ -41,7 +46,8 @@ public:
 
 		TMapS2S mBlocks = GetBlocks(s);
 
-		s = ReadTemplate(smExt);
+		s = ReadTemplate(crsFilepath + smExt);
+                s = FillLoops(s, sLists);
 		s = FillVariables(s, sContent);
 		s = FillBlocks(s, mBlocks);
 		}
@@ -51,6 +57,60 @@ public:
 	friend std::ostream & operator << (std::ostream & ros, CTE const & crTE)
 	    {
 	    return ros << crTE.m_sPage;
+	    }
+
+        TLpParm SplitLoopParam(std::string s)
+            {
+	    std::smatch      sm{};
+	    std::regex const re("([^\\s*]*)\\s*in\\s*([^\\s*]*)\\s*\\%\\}");
+	    std::string      s1{};
+	    std::string      s2{};
+	    std::regex_search(s, sm, re);
+	    if ( sm.size() > 1 )
+		{
+		s1 = sm[1];
+		s2 = sm[2];
+		}
+            return std::make_pair(s1, s2);
+            }
+
+	std::string FillVariables(std::string const & crsPart, std::string const & crsName, std::string const & crsData)
+            {
+            std::regex const re("\\{\\{\\s*"s + crsName + "\\s*\\}\\}"s);
+            return std::regex_replace(crsPart, re, crsData);
+            }
+/*
+{% for message in messages %}<div class=flash>WELCOME</div>
+                {% endfor %}
+*/
+	std::string FillLoops(std::string const & crsPage, TMapS2V & sLists)
+	    {
+	    std::ostringstream oss{};
+
+	    std::regex const re("\\{\\%\\s*for\\s*|\\{\\%\\s*endfor\\s*\\%\\}");
+	    size_t n{0};
+	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
+		{
+		if ( ++n & 1 )
+		    {
+		    oss << *it;
+//		    std::cout << "1---------1" << *it;
+		    }
+		else
+		    {
+		    //oss << mData[*it];
+		    std::string si = *it;
+                    TLpParm p = SplitLoopParam( si.substr(0, si.find('}')+1) );
+//		    std::cout << "2---------2" << *it; // message in messages %}...
+                    std::string so = si.substr(si.find('}')+1);
+                    for ( auto & a:sLists[p.second] )
+                        {
+	                oss << FillVariables(so, p.first, a);
+//	                std::cout << FillVariables(so, p.first, a);
+                        }
+		    }
+		}
+	    return oss.str();
 	    }
 
 	/**
