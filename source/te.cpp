@@ -10,7 +10,7 @@ int main()
     TMapS2V mVectors  { {"messages", {"hello", "world"}},
                         {"qresults", {"Star Trek", "Star Wars"}} };
 
-    CTE ote(mVariables, mVectors, "index.html", "../templates/");
+    Cte ote(mVariables, mVectors, "index.html", "../templates/");
 
     std::cout << ote;
     }

@@ -21,69 +21,68 @@ using TLpParm = std::pair<std::string, std::string>;
 
 using namespace std::string_literals;
 
-class CTE
+class Cte
     {
-	std::string m_sFilepath;
+	std::string const m_sFilepath;
 	std::string m_sPage;
 
-public:
+    public:
 
-	CTE(TMapS2S & sContent, TMapS2V & sLists, std::string const & crsFilename, std::string const & crsFilepath)
+	Cte(TMapS2S & mVariables, TMapS2V & mVLists, std::string const & crsFilename, std::string const & crsFilepath)
 	    : m_sFilepath(crsFilepath)
 	    {
 	    std::string s = ReadTemplate(m_sFilepath + crsFilename);
 
-            s = FillLoops(s, sLists);
-	    s = FillVariables(s, sContent);
+            s = FillLoops(s, mVLists);
+	    s = FillVariables(s, mVariables);
 
 	    std::smatch      sm{};
-	    std::regex const reExt("\\{\\%\\s*extends\\s*\"(.*)\"\\s*\\%\\}");
-	    std::string      smExt{};
-	    std::regex_search(s, sm, reExt);
+	    std::regex const re("\\{\\%\\s*extends\\s*\"(.*)\"\\s*\\%\\}");
+	    std::string      sExtend{};
+	    std::regex_search(s, sm, re);
 	    if ( sm.size() > 1 )
 		{
-		smExt = sm[1];
+		sExtend = sm[1];
 
 		TMapS2S mBlocks = GetBlocks(s);
 
-		s = ReadTemplate(crsFilepath + smExt);
-                s = FillLoops(s, sLists);
-		s = FillVariables(s, sContent);
+		s = ReadTemplate(crsFilepath + sExtend);
+                s = FillLoops(s, mVLists);
+		s = FillVariables(s, mVariables);
 		s = FillBlocks(s, mBlocks);
 		}
 	    m_sPage = std::move(s);
 	    }
 
-	friend std::ostream & operator << (std::ostream & ros, CTE const & crTE)
+	friend std::ostream & operator << (std::ostream & ros, Cte const & crTE)
 	    {
 	    return ros << crTE.m_sPage;
 	    }
 
-        TLpParm SplitLoopParam(std::string s)
+        TLpParm SplitLoopParam(std::string const & s) const
             {
 	    std::smatch      sm{};
 	    std::regex const re("([^\\s*]*)\\s*in\\s*([^\\s*]*)\\s*\\%\\}");
-	    std::string      s1{};
-	    std::string      s2{};
 	    std::regex_search(s, sm, re);
-	    if ( sm.size() > 1 )
+	    if ( sm.size() > 2 )
 		{
-		s1 = sm[1];
-		s2 = sm[2];
+		return std::make_pair(sm[1], sm[2]);
 		}
-            return std::make_pair(s1, s2);
+            return std::make_pair(""s, ""s);
             }
 
-	std::string FillVariables(std::string const & crsPart, std::string const & crsName, std::string const & crsData)
+        std::string FillVariables(std::string const & crsPart,
+        			  std::string const & crsName,
+				  std::string const & crsData) const
             {
             std::regex const re("\\{\\{\\s*"s + crsName + "\\s*\\}\\}"s);
             return std::regex_replace(crsPart, re, crsData);
             }
 /*
 {% for message in messages %}<div class=flash>WELCOME</div>
-                {% endfor %}
+{% endfor %}
 */
-	std::string FillLoops(std::string const & crsPage, TMapS2V & sLists)
+        std::string FillLoops(std::string const & crsPage, TMapS2V & sLists)
 	    {
 	    std::ostringstream oss{};
 
@@ -94,19 +93,14 @@ public:
 		if ( ++n & 1 )
 		    {
 		    oss << *it;
-//		    std::cout << "1---------1" << *it;
 		    }
 		else
 		    {
-		    //oss << mData[*it];
-		    std::string si = *it;
-                    TLpParm p = SplitLoopParam( si.substr(0, si.find('}')+1) );
-//		    std::cout << "2---------2" << *it; // message in messages %}...
-                    std::string so = si.substr(si.find('}')+1);
-                    for ( auto & a:sLists[p.second] )
+		    std::string const si = *it;
+                    auto        const p  = SplitLoopParam( si.substr(0, si.find('}')+1) );
+                    for ( auto const & a:sLists[p.second] )
                         {
-	                oss << FillVariables(so, p.first, a);
-//	                std::cout << FillVariables(so, p.first, a);
+	                oss << FillVariables(si.substr(si.find('}')+1), p.first, a);
                         }
 		    }
 		}
@@ -119,7 +113,7 @@ public:
 	 * @param crsPage The template
 	 * @param mData The data to fill in
 	 */
-	std::string FillVariables(std::string const & crsPage, TMapS2S & mData)
+	std::string FillVariables(std::string const & crsPage, TMapS2S & mData) const
 	    {
 	    std::ostringstream oss{};
 
@@ -145,7 +139,7 @@ public:
 	 * @param crsPage The input template text
 	 * @param mData The variables to fill in
 	 */
-	std::string FillBlocks(std::string const & crsPage, TMapS2S & mData)
+	std::string FillBlocks(std::string const & crsPage, TMapS2S & mData) const
 	    {
 	    std::ostringstream oss{};
 
@@ -175,7 +169,7 @@ public:
 	 *
 	 * @param page The template
 	 */
-	TMapS2S GetBlocks(std::string const & crsPage)
+	TMapS2S GetBlocks(std::string const & crsPage) const
 	    {
 	    TMapS2S mResult{};
 
@@ -194,7 +188,7 @@ public:
 	    return std::move(mResult);
 	    }
 
-	std::string ReadTemplate(std::string const & sFilename)
+	std::string ReadTemplate(std::string const & sFilename) const
 	    {
 	    std::ifstream f(sFilename);
 	    std::string   t((std::istreambuf_iterator<char>(f)),
