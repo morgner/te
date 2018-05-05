@@ -241,7 +241,6 @@ class Cte
                         {
                         oss << s.substr(q+1);
                         }
-//                  mResult[s.substr(0, p)] = s.substr(q+1);
 		    }
 		}
 	    return std::move(oss.str());
