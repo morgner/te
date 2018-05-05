@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }}{% endblock %}
+
+{% block content %}
+<h1>{{ node.name }}</h1>
+<ul>{% for property in properties %}
+    <li><a href="pi{{ property.id }}">{{ property.name }}</a></li>{% endfor %}
+</ul>
+<p>{{ story.tease|truncatewords:"100" }}</p>
+{% endfor %}
+{% endblock %}

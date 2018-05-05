@@ -19,7 +19,21 @@ using TMapS2S = std::map<std::string, std::string>;
 using TMapS2V = std::map<std::string, std::vector<std::string>>;
 using TLpParm = std::pair<std::string, std::string>;
 
-using namespace std::string_literals;
+using namespace std::string_literals; // @suppress("Using directive in header file")
+
+/*
+
+{% for node in nodes %}{% prefix %}<ul>{% end %}
+  <li>{{ node }}</li>
+{% suffix %}</ul>{% end %}{% end %}
+  =>
+<ul>
+  <li>Star Treck</li>
+  <li>Star Wars</li>
+</ul>
+
+*/
+
 
 class Cte
     {
@@ -28,16 +42,17 @@ class Cte
 
     public:
 
-	Cte(TMapS2S & mVariables, TMapS2V & mVLists, std::string const & crsFilename, std::string const & crsFilepath)
+	Cte(TMapS2S const & mVariables, TMapS2V & mVLists, std::string const & crsFilename, std::string const & crsFilepath = "")
 	    : m_sFilepath(crsFilepath)
 	    {
 	    std::string s = ReadTemplate(m_sFilepath + crsFilename);
 
+	    s = GetIfs(s, mVLists);
             s = FillLoops(s, mVLists);
 	    s = FillVariables(s, mVariables);
 
 	    std::smatch      sm{};
-	    std::regex const re("\\{\\%\\s*extends\\s*\"(.*)\"\\s*\\%\\}");
+	    std::regex const re(R"(\{\%\s*extends\s*\"(.*)\"\s*\%\})");
 	    std::string      sExtend{};
 	    std::regex_search(s, sm, re);
 	    if ( sm.size() > 1 )
@@ -47,6 +62,7 @@ class Cte
 		TMapS2S mBlocks = GetBlocks(s);
 
 		s = ReadTemplate(crsFilepath + sExtend);
+	        s = GetIfs(s, mVLists);
                 s = FillLoops(s, mVLists);
 		s = FillVariables(s, mVariables);
 		s = FillBlocks(s, mBlocks);
@@ -61,14 +77,15 @@ class Cte
 
         TLpParm SplitLoopParam(std::string const & s) const
             {
+
 	    std::smatch      sm{};
-	    std::regex const re("([^\\s*]*)\\s*in\\s*([^\\s*]*)\\s*\\%\\}");
+	    std::regex const re(R"(([^\s*]*)\s*in\s*([^\s*]*)\s*\%\})");
 	    std::regex_search(s, sm, re);
 	    if ( sm.size() > 2 )
 		{
 		return std::make_pair(sm[1], sm[2]);
 		}
-            return std::make_pair(""s, ""s);
+            return std::make_pair("", "");
             }
 
         std::string FillVariables(std::string const & crsPart,
@@ -79,14 +96,13 @@ class Cte
             return std::regex_replace(crsPart, re, crsData);
             }
 /*
-{% for message in messages %}<div class=flash>WELCOME</div>
-{% endfor %}
+{% for message in messages %}<div class=flash>{{ message }}</div>{% endfor %}
 */
-        std::string FillLoops(std::string const & crsPage, TMapS2V & sLists)
+        std::string FillLoops(std::string const & crsPage, TMapS2V const & mVLists) const
 	    {
 	    std::ostringstream oss{};
 
-	    std::regex const re("\\{\\%\\s*for\\s*|\\{\\%\\s*endfor\\s*\\%\\}");
+	    std::regex const re(R"(\{\%\s*for\s*|\{\%\s*endfor\s*\%\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -97,11 +113,15 @@ class Cte
 		else
 		    {
 		    std::string const si = *it;
-                    auto        const p  = SplitLoopParam( si.substr(0, si.find('}')+1) );
-                    for ( auto const & a:sLists[p.second] )
-                        {
-	                oss << FillVariables(si.substr(si.find('}')+1), p.first, a);
-                        }
+		    size_t      const  p = si.find('}')+1;
+                    auto        const param  = SplitLoopParam( si.substr(0, p) );
+                    if ( mVLists.find(param.second) != mVLists.end() )
+                	{
+			for ( auto const & a:mVLists.at(param.second) )
+			    {
+			    oss << FillVariables(si.substr(p), param.first, a);
+			    }
+                	}
 		    }
 		}
 	    return oss.str();
@@ -113,11 +133,11 @@ class Cte
 	 * @param crsPage The template
 	 * @param mData The data to fill in
 	 */
-	std::string FillVariables(std::string const & crsPage, TMapS2S & mData) const
+	std::string FillVariables(std::string const & crsPage, TMapS2S const & mVariables) const
 	    {
 	    std::ostringstream oss{};
 
-	    std::regex const re("\\{\\{\\s*|\\s*\\}\\}");
+	    std::regex const re(R"(\{\{\s*|\s*\}\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -127,7 +147,10 @@ class Cte
 		    }
 		else
 		    {
-		    oss << mData[*it];
+		    if ( mVariables.find(*it) != mVariables.end() )
+			{
+			oss << mVariables.at(*it);
+			}
 		    }
 		}
 	    return oss.str();
@@ -139,11 +162,11 @@ class Cte
 	 * @param crsPage The input template text
 	 * @param mData The variables to fill in
 	 */
-	std::string FillBlocks(std::string const & crsPage, TMapS2S & mData) const
+	std::string FillBlocks(std::string const & crsPage, TMapS2S const & mVariables) const
 	    {
 	    std::ostringstream oss{};
 
-	    std::regex const re("\\{\\%\\s*block\\s*|\\{\\%\\s*endblock\\s*\\%\\}");
+	    std::regex const re(R"(\{\%\s*block\s*|\{\%\s*endblock\s*\%\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -155,7 +178,16 @@ class Cte
 		    {
 		    std::string const s = *it;
 		    size_t      const p = s.find(' ');
-		    oss << mData[s.substr(0, p)];
+		    std::string const k = s.substr(0, p);
+		    size_t      const q = s.find('}')+1;
+                    if ( mVariables.find(k) != mVariables.end() )
+                        {
+		        oss << mVariables.at(k);
+                        }
+                    else
+                        {
+                        oss << s.substr(q);
+                        }
 		    }
 		}
 	    return oss.str();
@@ -173,7 +205,7 @@ class Cte
 	    {
 	    TMapS2S mResult{};
 
-	    std::regex const re("\\{\\%\\s*block\\s*|\\{\\%\\s*endblock\\s*\\%\\}");
+	    std::regex const re(R"(\{\%\s*block\s*|\{\%\s*endblock\s*\%\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -186,6 +218,33 @@ class Cte
 		    }
 		}
 	    return std::move(mResult);
+	    }
+
+	std::string GetIfs(std::string const & crsPage, TMapS2V const & mVLists) const
+	    {
+	    std::ostringstream oss{};
+
+	    std::regex const re(R"(\{\%\s*if\s*|\{\%\s*endif\s*\%\})");
+	    size_t n{0};
+	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
+		{
+		if ( ++n & 1 )
+                    {
+                    oss << *it;
+                    }
+                else
+		    {
+		    std::string const s = *it;
+		    size_t      const p = s.find(' ');
+		    size_t      const q = s.find('}');
+		    if ( mVLists.find(s.substr(0, p)) != mVLists.end() )
+                        {
+                        oss << s.substr(q+1);
+                        }
+//                  mResult[s.substr(0, p)] = s.substr(q+1);
+		    }
+		}
+	    return std::move(oss.str());
 	    }
 
 	std::string ReadTemplate(std::string const & sFilename) const
