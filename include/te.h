@@ -21,20 +21,6 @@ using TLpParm = std::pair<std::string, std::string>;
 
 using namespace std::string_literals; // @suppress("Using directive in header file")
 
-/*
-
-{% for node in nodes %}{% prefix %}<ul>{% end %}
-  <li>{{ node }}</li>
-{% suffix %}</ul>{% end %}{% end %}
-  =>
-<ul>
-  <li>Star Treck</li>
-  <li>Star Wars</li>
-</ul>
-
-*/
-
-
 class Cte
     {
 	std::string const m_sFilepath;
@@ -42,7 +28,7 @@ class Cte
 
     public:
 
-	Cte(TMapS2S const & mVariables, TMapS2V & mVLists, std::string const & crsFilename, std::string const & crsFilepath = "")
+	Cte(TMapS2S const & mVariables, TMapS2V const & mVLists, std::string const & crsFilename, std::string const & crsFilepath = "")
 	    : m_sFilepath(crsFilepath)
 	    {
 	    std::string s = ReadTemplate(m_sFilepath + crsFilename);
@@ -59,7 +45,7 @@ class Cte
 		{
 		sExtend = sm[1];
 
-		TMapS2S mBlocks = GetBlocks(s);
+		TMapS2S const mBlocks = GetBlocks(s);
 
 		s = ReadTemplate(crsFilepath + sExtend);
 	        s = GetIfs(s, mVLists);
