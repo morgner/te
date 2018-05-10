@@ -30,14 +30,14 @@ class Cte
 
     public:
 
-	Cte(TMapS2M & o, std::string const & crsFilename, std::string const & crsFilepath = "")
+	Cte(TMapS2M & mData, std::string const & crsFilename, std::string const & crsFilepath = "")
 	    : m_sFilepath(crsFilepath)
 	    {
 	    std::string s = ReadTemplate(m_sFilepath + crsFilename);
 
-	    s = GetIfs(s, o);
-            s = FillLoops(s, o);
-	    s = FillVariables(s, o);
+	    s = GetIfs(s, mData);
+            s = FillLoops(s, mData);
+	    s = FillVariables(s, mData);
 
 	    std::smatch      sm{};
 	    std::regex const re(R"(\{\%\s*extends\s*\"(.*)\"\s*\%\})");
@@ -50,9 +50,9 @@ class Cte
 		TMapS2S const mBlocks = GetBlocks(s);
 
 		s = ReadTemplate(crsFilepath + sExtend);
-	        s = GetIfs(s, o);
-                s = FillLoops(s, o);
-		s = FillVariables(s, o);
+	        s = GetIfs(s, mData);
+                s = FillLoops(s, mData);
+		s = FillVariables(s, mData);
 		s = FillBlocks(s, mBlocks);
 		}
 	    m_sPage = std::move(s);
@@ -146,7 +146,6 @@ class Cte
 		    {
 //                  {"my", { {"", "demo"},    {"pk",   "demo-private"} } },
 //		 =>     {{ my }} = demo & {{ my.pk }} = demo-private
-//		    oss << mVariables.find(sk1)->second.find(sk2)->second;
 
 		    std::string sk1 = *it;
 		    std::string sk2 = "";
