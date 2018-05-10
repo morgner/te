@@ -2,15 +2,49 @@
 
 int main()
     {
-    TMapS2S const mVariables { {"title", "odb Viewer"}, {"message", "WELCOME"},
-                               {"my", "demo"}, {"former-query", "t:Star Trek"},
-                               {"static+favicon-icon", "/static/fav.icon"},
-                               {"static+style-css", "/static/style.css"} };
+/*
+    TMapS2M o;
+    TSubMap u;
+    u.emplace("", "person");
+    u.emplace("id", "0");
+    o.emplace("prop", u );
+    u.clear();
 
-    TMapS2V const mVectors   { {"messages", {"hello", "world"}},
-                               {"qresults", {"Star Trek", "Star Wars"}} };
+    u.emplace("", "actor");
+    u.emplace("id", "1");
+    o.emplace("prop", u );
+    u.clear();
 
-    Cte const ote(mVariables, mVectors, "index.html", "../templates/");
+    u.emplace("", "movie");
+    u.emplace("id", "2");
+    o.emplace("prop", u );
+    u.clear();
+*/
+    TMapS2M o{ {"node", { {"", "Mike Miller"},  {"id", "1"}, {"name", "miller"}  } },
+               {"node", { {"", "Nora Stands"},  {"id", "2"}, {"name", "stands"}  } },
+    //                    node="Mike Miller" node.id="1"  node.name="miller"
+               {"title",              { {"", "odb Viewer"}                       } },
+               {"my",                 { {"", "demo"}, {"pk", "demo-private"}     } },
+               {"message",            { {"", "WELCOME"}                          } },
+               {"former-query",       { {"", "t:Star Trek"}                      } },
+               {"static+favicon-ico", { {"", "/static/fav.icon"}                 } },
+               {"static+style-css",   { {"", "/static/style.css"}                } },
+	       {"properties", { {"", "nm9087684"},  {"", "actor"},  {"", "director"} } },
+	       {"linked",     { {"", "Star Treck"}, {"", "nobody"}, {"", "couple"  } } }
+                                                                                        };
+/*
+    for (auto & a:o)
+	{
+	std::cout << a.first << ", [";
+	for (auto & b:a.second)
+	    {
+	    std::cout << "(" << b.first << ", " << b.second << ") ";
+	    }
+	std::cout << "]\n";
+	}
+*/
+
+    Cte const ote(o, "index.html", "../templates/");
 
     std::cout << ote;
     }

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block data %}
-        <p>{{ class }} : <a href="ni{{ node }}">{{ node }}</a></p>{% if properties %}
+        <p>{{ class }} : <a href="ni={{ node.id }}">{{ node }}</a>( {{ node.name }} )</p>{% if property %}
         <p><ul>{% for property in properties %}
-               <li><a href="p:{{ property.id }}">{{ property }}</a></li>{% endfor %}
+               <li><a href="pi={{ property.id }}">{{ property }}</a></li>{% endfor %}
            </ul></p>
-        {% endif %}{% if linked %}<p><ul>{% for link in linked %}
-               <li><a href="l:{{ link }}">{{ link }}</a></li>{% endfor %}
+        {% endif %}{% if link %}<p><ul>{% for link in linked %}
+               <li><a href="li={{ link.id }}">{{ link.reason }} {{ link }}</a></li>{% endfor %}
            </ul></p>
 {% endif %}{% endblock %}
 

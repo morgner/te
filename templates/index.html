@@ -14,4 +14,5 @@
 openssl req -new -utf8 -days 7301 \
             -newkey rsa:4096 -nodes \
             -subj "/CN=my name/O=org/C=CH/ST=ZH/L=Zurich" \
-            -keyout "{{ my }}-private.key" -out "{{ my }}.csr"</pre>{% endblock %}
+            -keyout "(( my.pk )).key" -out "(( my )).csr"</pre>
+            -keyout "{{ my.pk }}-private.key" -out "{{ my }}.csr"</pre>{% endblock %}

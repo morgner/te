@@ -4,10 +4,8 @@
 #include <fstream>
 #include <iostream>     // std::cout
 #include <algorithm>
-#include <iterator>
 #include <regex>
 #include <map>
-#include <vector>
 #include <utility>      // std::pair
 
 #include <string>       // std::string
@@ -16,8 +14,12 @@
 
 
 using TMapS2S = std::map<std::string, std::string>;
-using TMapS2V = std::map<std::string, std::vector<std::string>>;
+
+using TSubMap = std::map<std::string, std::string>;
+using TMapS2M = std::multimap<std::string, TSubMap>;
 using TLpParm = std::pair<std::string, std::string>;
+
+
 
 using namespace std::string_literals; // @suppress("Using directive in header file")
 
@@ -28,14 +30,14 @@ class Cte
 
     public:
 
-	Cte(TMapS2S const & mVariables, TMapS2V const & mVLists, std::string const & crsFilename, std::string const & crsFilepath = "")
+	Cte(TMapS2M & o, std::string const & crsFilename, std::string const & crsFilepath = "")
 	    : m_sFilepath(crsFilepath)
 	    {
 	    std::string s = ReadTemplate(m_sFilepath + crsFilename);
 
-	    s = GetIfs(s, mVLists);
-            s = FillLoops(s, mVLists);
-	    s = FillVariables(s, mVariables);
+	    s = GetIfs(s, o);
+            s = FillLoops(s, o);
+	    s = FillVariables(s, o);
 
 	    std::smatch      sm{};
 	    std::regex const re(R"(\{\%\s*extends\s*\"(.*)\"\s*\%\})");
@@ -48,25 +50,37 @@ class Cte
 		TMapS2S const mBlocks = GetBlocks(s);
 
 		s = ReadTemplate(crsFilepath + sExtend);
-	        s = GetIfs(s, mVLists);
-                s = FillLoops(s, mVLists);
-		s = FillVariables(s, mVariables);
+	        s = GetIfs(s, o);
+                s = FillLoops(s, o);
+		s = FillVariables(s, o);
 		s = FillBlocks(s, mBlocks);
 		}
 	    m_sPage = std::move(s);
 	    }
 
+	/**
+	 * @brief The output stream operator for Cte outputs the resulting page
+	 *
+	 * @param ros The output stream
+	 * @param crote The template engine
+	 */
 	friend std::ostream & operator << (std::ostream & ros, Cte const & crTE)
 	    {
 	    return ros << crTE.m_sPage;
 	    }
 
-        TLpParm SplitLoopParam(std::string const & s) const
+	/**
+	 * @brief Converts " value in values %}" to a pair<"value", "values">
+	 * 	  where values is the key of the values, who go into {{ value }}
+	 *
+	 * @param crsFragment The statement fragment to be sorted
+	 */
+        TLpParm SplitLoopParam(std::string const & crsFragment) const
             {
 
 	    std::smatch      sm{};
 	    std::regex const re(R"(([^\s*]*)\s*in\s*([^\s*]*)\s*\%\})");
-	    std::regex_search(s, sm, re);
+	    std::regex_search(crsFragment, sm, re);
 	    if ( sm.size() > 2 )
 		{
 		return std::make_pair(sm[1], sm[2]);
@@ -74,18 +88,14 @@ class Cte
             return std::make_pair("", "");
             }
 
-        std::string FillVariables(std::string const & crsPart,
-        			  std::string const & crsName,
-				  std::string const & crsData) const
-            {
-            std::regex const re("\\{\\{\\s*"s + crsName + "\\s*\\}\\}"s);
-            return std::regex_replace(crsPart, re, crsData);
-            }
-/*
-{% for message in messages %}<div class=flash>{{ message }}</div>{% endfor %}
-*/
-        std::string FillLoops(std::string const & crsPage, TMapS2V const & mVLists) const
+        /**
+         * @brief Replaces "{% for message in messages %}<li>{{ message }}</li>{% endfor %}"
+         *        with "<li>`mVListsat("message")`</li>" for each message in messages
+         */
+        std::string FillLoops(std::string const & crsPage, TMapS2M const & mm) const
 	    {
+//	    {"property", { {"id", "1"}, {"", "nm9087684"}   } },
+//	    {"property", { {"id", "2"}, {"", "actor"}       } },
 	    std::ostringstream oss{};
 
 	    std::regex const re(R"(\{\%\s*for\s*|\{\%\s*endfor\s*\%\})");
@@ -98,28 +108,78 @@ class Cte
 		    }
 		else
 		    {
-		    std::string const si = *it;
-		    size_t      const  p = si.find('}')+1;
-                    auto        const param  = SplitLoopParam( si.substr(0, p) );
-                    if ( mVLists.find(param.second) != mVLists.end() )
+		    std::string const si    = *it;
+		    size_t      const p     = si.find('}')+1;
+                    auto        const param = SplitLoopParam( si.substr(0, p) );
+                    auto        const er    = mm.equal_range(param.first);
+                    for (auto itm=er.first; itm!=er.second; ++itm)
                 	{
-			for ( auto const & a:mVLists.at(param.second) )
-			    {
-			    oss << FillVariables(si.substr(p), param.first, a);
-			    }
+                        oss << FillVariables(si.substr(p), param.first, itm->second);
                 	}
 		    }
 		}
 	    return oss.str();
 	    }
 
+        /**
+         * @brief Replaces '{{ crsName }}' with value
+         *
+         * @param crsPart A part of the document
+         * @param crsName The variables base name
+         * @param mVariables The data
+         */
+        std::string FillVariables(std::string const & crsPart,
+        			  std::string const & crsName,
+				  TSubMap     const & mVariables) const
+            {
+	    std::ostringstream oss{};
+
+	    std::regex const re(R"(\{\{\s*|\s*\}\})");
+	    size_t n{0};
+	    for (auto it = std::sregex_token_iterator(crsPart.begin(), crsPart.end(), re, -1); it != std::sregex_token_iterator(); ++it)
+		{
+		if ( ++n & 1 )
+		    {
+		    oss << *it;
+		    }
+		else
+		    {
+//                  {"my", { {"", "demo"},    {"pk",   "demo-private"} } },
+//		 =>     {{ my }} = demo & {{ my.pk }} = demo-private
+//		    oss << mVariables.find(sk1)->second.find(sk2)->second;
+
+		    std::string sk1 = *it;
+		    std::string sk2 = "";
+		    size_t const  p = sk1.find('.');
+		    if ( p != std::string::npos )
+			{
+			sk2 = sk1.substr(p+1);
+			sk1 = sk1.substr(0,p);
+			}
+
+		    if ( crsName != sk1 )
+			{
+			oss << "{{ !!!" << *it << "!!! }}";
+			continue;
+			}
+
+		    auto const a = mVariables.find(sk2);
+		    if ( a != mVariables.end() )
+			{
+			oss << a->second;
+			}
+		    }
+		}
+	    return oss.str();
+	    }
+
 	/**
-	 * @brief Fills in variales
+	 * @brief Replaces "{{ value }}" with the value.
 	 *
 	 * @param crsPage The template
 	 * @param mData The data to fill in
 	 */
-	std::string FillVariables(std::string const & crsPage, TMapS2S const & mVariables) const
+        std::string FillVariables(std::string const & crsPage, TMapS2M& mData) const
 	    {
 	    std::ostringstream oss{};
 
@@ -133,9 +193,27 @@ class Cte
 		    }
 		else
 		    {
-		    if ( mVariables.find(*it) != mVariables.end() )
+//                  {"my", { {"", "demo"},    {"pk",   "demo-private"} } },
+//		 =>     {{ my }} = demo & {{ my.pk }} = demo-private
+//		    oss << mVariables.find(sk1)->second.find(sk2)->second;
+
+		    std::string sk1 = *it;
+		    std::string sk2 = "";
+		    size_t const  p = sk1.find('.');
+		    if ( p != std::string::npos )
 			{
-			oss << mVariables.at(*it);
+			sk2 = sk1.substr(p+1);
+			sk1 = sk1.substr(0,p);
+			}
+
+		    auto const a = mData.find(sk1);
+		    if ( a != mData.end() )
+			{
+			auto const b = a->second.find(sk2);
+			if ( b != a->second.end() )
+			    {
+			    oss << b->second;
+			    }
 			}
 		    }
 		}
@@ -148,7 +226,7 @@ class Cte
 	 * @param crsPage The input template text
 	 * @param mData The variables to fill in
 	 */
-	std::string FillBlocks(std::string const & crsPage, TMapS2S const & mVariables) const
+	std::string FillBlocks(std::string const & crsPage, TMapS2S const & mBlocks) const
 	    {
 	    std::ostringstream oss{};
 
@@ -166,9 +244,9 @@ class Cte
 		    size_t      const p = s.find(' ');
 		    std::string const k = s.substr(0, p);
 		    size_t      const q = s.find('}')+1;
-                    if ( mVariables.find(k) != mVariables.end() )
+                    if ( mBlocks.find(k) != mBlocks.end() )
                         {
-		        oss << mVariables.at(k);
+		        oss << mBlocks.at(k);
                         }
                     else
                         {
@@ -206,7 +284,15 @@ class Cte
 	    return std::move(mResult);
 	    }
 
-	std::string GetIfs(std::string const & crsPage, TMapS2V const & mVLists) const
+	/**
+	 * @brief Filters the template by removing sequences surrounded by
+	 * 	  surrounded by negative evaluated IF statements like this:
+	 *
+	 * 	  "{%if data %}{% endif%}" becomes ""
+	 *
+	 * 	  This enables to remove prefix and suffix of loops
+	 */
+	std::string GetIfs(std::string const & crsPage, TMapS2M const & mData) const
 	    {
 	    std::ostringstream oss{};
 
@@ -223,7 +309,7 @@ class Cte
 		    std::string const s = *it;
 		    size_t      const p = s.find(' ');
 		    size_t      const q = s.find('}');
-		    if ( mVLists.find(s.substr(0, p)) != mVLists.end() )
+		    if ( mData.find(s.substr(0, p)) != mData.end() )
                         {
                         oss << s.substr(q+1);
                         }
@@ -232,9 +318,14 @@ class Cte
 	    return std::move(oss.str());
 	    }
 
-	std::string ReadTemplate(std::string const & sFilename) const
+	/**
+	 * @brief Reads the given file into a string
+	 *
+	 *
+	 */
+	std::string ReadTemplate(std::string const & crsFilename) const
 	    {
-	    std::ifstream f(sFilename);
+	    std::ifstream f(crsFilename);
 	    std::string   t((std::istreambuf_iterator<char>(f)),
 			     std::istreambuf_iterator<char>());
 	    return std::move(t);

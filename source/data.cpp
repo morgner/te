@@ -2,15 +2,23 @@
 
 int main()
     {
-    TMapS2S const  mVariables{ {"title", "odb Viewer"}, {"message", "WELCOME"},
-                               {"my", "demo"}, {"former-query", "t:Star Trek"},
-                               {"static+favicon-icon", "/static/fav.icon"},
-                               {"static+style-css", "/static/style.css"} };
+    TMapS2M o{ {"node", { {"", "Mike Miller"},  {"id", "1"}, {"name", "miller"}  } },
+               {"node", { {"", "Nora Stands"},  {"id", "2"}, {"name", "stands"}  } },
+    //                    node="Mike Miller" node.id="1"  node.name="miller"
+               {"title",              { {"", "odb Viewer"}                       } },
+               {"message",            { {"", "WELCOME"}                          } },
+               {"former-query",       { {"", "t:Star Trek"}                      } },
+               {"static+favicon-ico", { {"", "/static/fav.icon"}                 } },
+               {"static+style-css",   { {"", "/static/style.css"}                } },
+	       {"property",           { {"id", "1"}, {"", "nm9087684"}   } },
+	       {"property",           { {"id", "2"}, {"", "actor"}       } },
+	       {"property",           { {"id", "3"}, {"", "director"}    } },
+	       {"link",               { {"id", "1"}, {"reason", "acted in"}, {"", "Star Treck"} } },
+               {"link",               { {"id", "2"}, {"reason", "directed"}, {"", "nobody"} } },
+               {"link",               { {"id", "3"}, {"reason", "saw"},      {"", "couple"  } } }
+                                                                                         };
 
-    TMapS2V const mVectors   { {"properties", {"nm9087684", "actor", "director"}},
-                               {"linked",     {"Star Treck", "nobody", "couple"}} };
-
-    Cte const ote(mVariables, mVectors, "data.html", "../templates/");
+    Cte const ote(o, "data.html", "../templates/");
 
     std::cout << ote;
     }
