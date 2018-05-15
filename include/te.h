@@ -58,6 +58,8 @@ class Cte
 	    m_sPage = std::move(s);
 	    }
 
+	size_t length() const { return m_sPage.length(); }
+
 	/**
 	 * @brief The output stream operator for Cte outputs the resulting page
 	 *
