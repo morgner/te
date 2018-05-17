@@ -136,7 +136,7 @@ class Cte
             {
 	    std::ostringstream oss{};
 
-	    std::regex const re(R"(\{\{\s*|\s*\}\})");
+	    std::regex const re(R"(\{\{[^\{]\s*|\s*[^\}]\}\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPart.begin(), crsPart.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -184,7 +184,7 @@ class Cte
 	    {
 	    std::ostringstream oss{};
 
-	    std::regex const re(R"(\{\{\s*|\s*\}\})");
+	    std::regex const re(R"(\{\{[^\{]\s*|\s*[^\}]\}\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
