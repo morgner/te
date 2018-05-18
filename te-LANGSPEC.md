@@ -1,10 +1,10 @@
-##te Template Language
+## te Template Language
 
 The te language is a simplyfied Django-Project template language. It is not
 planned to implement the whole functionality but some extension may become
 their te implemntation
 
-###Basics
+### Basics
 
 During template interpretation not interpretable tags and blocks become removed
 as if they hadn't exist. For example. if there is no value for 'variable' the
@@ -36,7 +36,7 @@ interpreted this way
 ```
 
 
-###Test suite
+### Test suite
 
 ```
 "{{ variable }}"                  "replacement"
