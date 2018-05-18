@@ -12,6 +12,9 @@
 #include <streambuf>
 #include <sstream>      // std::ostringstream
 
+#ifndef NDEBUG
+#define  DEBUG
+#endif
 
 using TMapS2S = std::map<std::string, std::string>;
 
@@ -169,6 +172,9 @@ class Cte
 			{
 			oss << a->second;
 			}
+#ifdef DEBUG
+                    else { std::cerr << "te-debug, variable [" << sk2 << "] not found"; }
+#endif
 		    }
 		}
 	    return oss.str();
@@ -215,6 +221,9 @@ class Cte
 			    {
 			    oss << b->second;
 			    }
+#ifdef DEBUG
+                        else { std::cerr << "te-debug, variable [" << sk2 << "] not found"; }
+#endif
 			}
 		    }
 		}
@@ -251,6 +260,9 @@ class Cte
                         }
                     else
                         {
+#ifdef DEBUG
+                        std::cerr << "te-debug, block [" << k << "] not overwritten, keep: [" << s.substr(q) << "]";
+#endif
                         oss << s.substr(q);
                         }
 		    }
