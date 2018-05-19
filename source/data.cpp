@@ -2,7 +2,7 @@
 
 int main()
     {
-    TMapS2M o{ {"node", { {"", "Mike Miller"},  {"id", "1"}, {"name", "miller"}  } },
+    TRenderData o{ {"node", { {"", "Mike Miller"},  {"id", "1"}, {"name", "miller"}  } },
                {"node", { {"", "Nora Stands"},  {"id", "2"}, {"name", "stands"}  } },
     //                    node="Mike Miller" node.id="1"  node.name="miller"
                {"title",              { {"", "odb Viewer"}                       } },

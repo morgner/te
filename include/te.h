@@ -16,24 +16,23 @@
 #define  DEBUG
 #endif
 
-using TMapS2S = std::map<std::string, std::string>;
 
-using TSubMap = std::map<std::string, std::string>;
-using TMapS2M = std::multimap<std::string, TSubMap>;
-using TLpParm = std::pair<std::string, std::string>;
-
-
+using TRenderItem = std::map<std::string, std::string>;
+using TRenderData = std::multimap<std::string, TRenderItem>;
 
 using namespace std::string_literals; // @suppress("Using directive in header file")
 
 class Cte
     {
+	using TMapS2S = std::map<std::string, std::string>;
+	using TLoopParams = std::pair<std::string, std::string>;
+
 	std::string const m_sFilepath;
 	std::string m_sPage;
 
     public:
 
-	Cte(TMapS2M & mData, std::string const & crsFilename, std::string const & crsFilepath = "")
+	Cte(TRenderData & mData, std::string const & crsFilename, std::string const & crsFilepath = "")
 	    : m_sFilepath(crsFilepath)
 	    {
 	    std::string s = ReadTemplate(m_sFilepath + crsFilename);
@@ -80,7 +79,7 @@ class Cte
 	 *
 	 * @param crsFragment The statement fragment to be sorted
 	 */
-        TLpParm SplitLoopParam(std::string const & crsFragment) const
+        TLoopParams SplitLoopParam(std::string const & crsFragment) const
             {
 
 	    std::smatch      sm{};
@@ -97,7 +96,7 @@ class Cte
          * @brief Replaces "{% for message in messages %}<li>{{ message }}</li>{% endfor %}"
          *        with "<li>`mVListsat("message")`</li>" for each message in messages
          */
-        std::string FillLoops(std::string const & crsPage, TMapS2M const & mm) const
+        std::string FillLoops(std::string const & crsPage, TRenderData const & mm) const
 	    {
 //	    {"property", { {"id", "1"}, {"", "nm9087684"}   } },
 //	    {"property", { {"id", "2"}, {"", "actor"}       } },
@@ -135,7 +134,7 @@ class Cte
          */
         std::string FillVariables(std::string const & crsPart,
         			  std::string const & crsName,
-				  TSubMap     const & mVariables) const
+				  TRenderItem     const & mVariables) const
             {
 	    std::ostringstream oss{};
 
@@ -186,7 +185,7 @@ class Cte
 	 * @param crsPage The template
 	 * @param mData The data to fill in
 	 */
-        std::string FillVariables(std::string const & crsPage, TMapS2M& mData) const
+        std::string FillVariables(std::string const & crsPage, TRenderData& mData) const
 	    {
 	    std::ostringstream oss{};
 
@@ -305,7 +304,7 @@ class Cte
 	 *
 	 * 	  This enables to remove prefix and suffix of loops
 	 */
-	std::string GetIfs(std::string const & crsPage, TMapS2M const & mData) const
+	std::string GetIfs(std::string const & crsPage, TRenderData const & mData) const
 	    {
 	    std::ostringstream oss{};
 

@@ -29,7 +29,7 @@ struct SimpleReplacementTest001 : FilesystemTemplateTest<SimpleReplacementTest00
   void test_simple_variable_replacement()
     {
     auto buffer = std::ostringstream{};
-    TMapS2M mVariables{
+    TRenderData mVariables{
         { "variable", {{ "", "replacement" }} }
     };
 
@@ -54,7 +54,7 @@ struct SimpleReplacementTest002 : FilesystemTemplateTest<SimpleReplacementTest00
   void test_simple_variable_replacement()
     {
     auto buffer = std::ostringstream{};
-    TMapS2M mVariables{
+    TRenderData mVariables{
         { "variable", {{ "", "replacement" }} }
     };
 
@@ -79,7 +79,7 @@ struct SimpleReplacementTest003 : FilesystemTemplateTest<SimpleReplacementTest00
   void test_simple_variable_replacement()
     {
     auto buffer = std::ostringstream{};
-    TMapS2M mVariables{
+    TRenderData mVariables{
         { "variable", {{ "", "replacement" }} }
     };
 
@@ -104,7 +104,7 @@ struct SimpleReplacementTest004 : FilesystemTemplateTest<SimpleReplacementTest00
   void test_simple_variable_replacement()
     {
     auto buffer = std::ostringstream{};
-    TMapS2M mVariables{
+    TRenderData mVariables{
         { "variable", {{ "", "replacement" }} }
     };
 
@@ -129,7 +129,7 @@ struct SimpleReplacementTest005 : FilesystemTemplateTest<SimpleReplacementTest00
   void test_simple_variable_replacement()
     {
     auto buffer = std::ostringstream{};
-    TMapS2M mVariables{
+    TRenderData mVariables{
         { "variable", {{ "", "replacement" }} }
     };
 
@@ -154,7 +154,7 @@ struct SimpleReplacementTest006 : FilesystemTemplateTest<SimpleReplacementTest00
   void test_simple_variable_replacement()
     {
     auto buffer = std::ostringstream{};
-    TMapS2M mVariables{
+    TRenderData mVariables{
         { "variable", {{ "", "replacement" }} }
     };
 
@@ -179,7 +179,7 @@ struct SimpleReplacementTest007 : FilesystemTemplateTest<SimpleReplacementTest00
   void test_simple_variable_replacement()
     {
     auto buffer = std::ostringstream{};
-    TMapS2M mVariables{
+    TRenderData mVariables{
         { "variable", {{ "", "replacement" }} }
     };
 

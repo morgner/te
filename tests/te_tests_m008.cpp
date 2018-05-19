@@ -29,7 +29,7 @@ struct SimpleReplacementTest : FilesystemTemplateTest<SimpleReplacementTest>
   void test_simple_variable_replacement()
     {
     auto buffer = std::ostringstream{};
-    TMapS2M mVariables{
+    TRenderData mVariables{
         { "f1", { { "id", "H" }} },
         { "f1", { { "id", "E" }} },
         { "f1", { { "id", "L" }} },
