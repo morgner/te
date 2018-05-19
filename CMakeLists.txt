@@ -31,7 +31,7 @@ find_package(Threads)
 
 include_directories(include)
 
-#add_subdirectory(source)
+add_subdirectory(source)
 add_subdirectory(include)
 #add_subdirectory(demo)
 

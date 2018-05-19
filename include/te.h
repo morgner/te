@@ -119,7 +119,7 @@ class Cte
 #ifdef DEBUG
                     if ( er.first != er.second )
                 	{
-                	std::cerr << "te-debug, loop [" << param.first << "] not found";
+                	std::cerr << "\nte-debug, loop [" << param.first << "] not found\n";
                 	}
 #endif
                     for (auto itm=er.first; itm!=er.second; ++itm)
@@ -178,7 +178,7 @@ class Cte
 			oss << a->second;
 			}
 #ifdef DEBUG
-                    else { std::cerr << "te-debug, variable [" << sk2 << "] not found"; }
+                    else { std::cerr << "\nte-debug, variable [" << sk2 << "] not found\n"; }
 #endif
 		    }
 		}
@@ -227,7 +227,7 @@ class Cte
 			    oss << b->second;
 			    }
 #ifdef DEBUG
-                        else { std::cerr << "te-debug, variable [" << sk2 << "] not found"; }
+                        else { std::cerr << "\nte-debug, variable [" << sk2 << "] not found\n"; }
 #endif
 			}
 		    }
@@ -266,7 +266,7 @@ class Cte
                     else
                         {
 #ifdef DEBUG
-                        std::cerr << "te-debug, block [" << k << "] not overwritten, keep: [" << s.substr(q) << "]";
+                        std::cerr << "\nte-debug, block [" << k << "] not overwritten, keep: [" << s.substr(q) << "]\n";
 #endif
                         oss << s.substr(q);
                         }
