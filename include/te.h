@@ -116,6 +116,12 @@ class Cte
 		    size_t      const p     = si.find('}')+1;
                     auto        const param = SplitLoopParam( si.substr(0, p) );
                     auto        const er    = mm.equal_range(param.first);
+#ifdef DEBUG
+                    if ( er.first != er.second )
+                	{
+                	std::cerr << "te-debug, loop [" << param.first << "] not found";
+                	}
+#endif
                     for (auto itm=er.first; itm!=er.second; ++itm)
                 	{
                         oss << FillVariables(si.substr(p), param.first, itm->second);
