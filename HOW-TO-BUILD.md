@@ -4,6 +4,8 @@ Building the te
 ```bash
 cd <project_root>
 git submodule add git@github.com:PeterSommerlad/CUTE.git cute
+or
+git submodule update --init
 mkdir -p build
 cd build
 cmake ..
