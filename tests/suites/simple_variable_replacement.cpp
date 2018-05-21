@@ -8,14 +8,50 @@
 namespace test_suite
   {
 
-  void test_simple_variable_replacement()
-    {
-    auto oData = TRenderData{{"variable", {{"", "replacement"}}}};
-    ASSERT_EQUAL(
-      "replacement",
-      perform_replacement(oData, "{{ variable }}")
-    );
-    }
+void test_simple_variable_replacement()
+  {
+  auto oData = TRenderData{{"variable", {{"", "replacement"}}}};
+  ASSERT_EQUAL(
+    "replacement",
+    perform_replacement(oData, "{{ variable }}")
+  );
+  }
+
+void test_simple_variable_replacement_plus_space_left()
+  {
+  auto oData = TRenderData{{"variable", {{"", "replacement"}}}};
+  ASSERT_EQUAL(
+    "replacement",
+    perform_replacement(oData, "{{  variable }}")
+  );
+  }
+
+void test_simple_variable_replacement_tab_left()
+  {
+  auto oData = TRenderData{{"variable", {{"", "replacement"}}}};
+  ASSERT_EQUAL(
+    "replacement",
+    perform_replacement(oData, "{{\tvariable }}")
+  );
+  }
+
+void test_simple_variable_replacement_plus_space_right()
+  {
+  auto oData = TRenderData{{"variable", {{"", "replacement"}}}};
+  ASSERT_EQUAL(
+    "replacement",
+    perform_replacement(oData, "{{ variable  }}")
+  );
+  }
+
+void test_simple_variable_replacement_tab_right()
+  {
+  auto oData = TRenderData{{"variable", {{"", "replacement"}}}};
+  ASSERT_EQUAL(
+    "replacement",
+    perform_replacement(oData, "{{ variable\t}}")
+  );
+  }
 
   void test_simple_variable_replacement_without_root_value_should_produce_empty_replacement()
     {
@@ -57,6 +93,10 @@ namespace test_suite
     "Simple variable replacement",
       {
       CUTE(test_simple_variable_replacement),
+      CUTE(test_simple_variable_replacement_plus_space_left),
+      CUTE(test_simple_variable_replacement_tab_left),
+      CUTE(test_simple_variable_replacement_plus_space_right),
+      CUTE(test_simple_variable_replacement_tab_right),
       CUTE(test_simple_variable_replacement_without_root_value_should_produce_empty_replacement),
       CUTE(test_simple_variable_replacement_without_replacement_for_variable_should_leave_template_intact),
       CUTE(test_simple_variable_replacement_with_surrounding_context),

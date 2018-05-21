@@ -24,8 +24,8 @@ using namespace std::string_literals; // @suppress("Using directive in header fi
 
 class Cte
     {
-	using TMapS2S = std::map<std::string, std::string>;
-	using TLoopParams = std::pair<std::string, std::string>;
+	using TMapOfBlocks = std::map<std::string, std::string>;
+	using TLoopParams  = std::pair<std::string, std::string>;
 
 	std::string const m_sFilepath;
 	std::string m_sPage;
@@ -35,29 +35,29 @@ class Cte
 	Cte(TRenderData & mData, std::string const & crsFilename, std::string const & crsFilepath = "")
 	    : m_sFilepath(crsFilepath)
 	    {
-	    std::string s = ReadTemplate(m_sFilepath + crsFilename);
+	    std::string sTemplate = ReadTemplate(m_sFilepath + crsFilename);
 
-	    s = GetIfs(s, mData);
-            s = FillLoops(s, mData);
-	    s = FillVariables(s, mData);
+	    sTemplate = GetIfs(sTemplate, mData);
+            sTemplate = FillLoops(sTemplate, mData);
+	    sTemplate = FillVariables(sTemplate, mData);
 
 	    std::smatch      sm{};
-	    std::regex const re(R"(\{\%\s*extends\s*\"(.*)\"\s*\%\})");
+	    std::regex const re(R"(\{\%\sTemplate*extends\sTemplate*\"(.*)\"\sTemplate*\%\})");
 	    std::string      sExtend{};
-	    std::regex_search(s, sm, re);
+	    std::regex_search(sTemplate, sm, re);
 	    if ( sm.size() > 1 )
 		{
 		sExtend = sm[1];
 
-		TMapS2S const mBlocks = GetBlocks(s);
+		TMapOfBlocks const mBlocks = GetBlocks(sTemplate);
 
-		s = ReadTemplate(crsFilepath + sExtend);
-	        s = GetIfs(s, mData);
-                s = FillLoops(s, mData);
-		s = FillVariables(s, mData);
-		s = FillBlocks(s, mBlocks);
+		sTemplate = ReadTemplate(crsFilepath + sExtend);
+	        sTemplate = GetIfs(sTemplate, mData);
+                sTemplate = FillLoops(sTemplate, mData);
+		sTemplate = FillVariables(sTemplate, mData);
+		sTemplate = FillBlocks(sTemplate, mBlocks);
 		}
-	    m_sPage = std::move(s);
+	    m_sPage = std::move(sTemplate);
 	    }
 
 	size_t length() const { return m_sPage.length(); }
@@ -98,8 +98,11 @@ class Cte
          */
         std::string FillLoops(std::string const & crsPage, TRenderData const & mm) const
 	    {
-//	    {"property", { {"id", "1"}, {"", "nm9087684"}   } },
-//	    {"property", { {"id", "2"}, {"", "actor"}       } },
+//	    { {"property", { {"id", "1"}, {"", "nm9087684"} } },
+//	      {"property", { {"id", "2"}, {"", "actor"}     } } }
+//
+//          "{% for property i dummy %}{{ property.id }}, {% endfor %}" => "1, 2, "
+
 	    std::ostringstream oss{};
 
 	    std::regex const re(R"(\{\%\s*for\s*|\{\%\s*endfor\s*\%\})");
@@ -117,10 +120,7 @@ class Cte
                     auto        const param = SplitLoopParam( si.substr(0, p) );
                     auto        const er    = mm.equal_range(param.first);
 #ifdef DEBUG
-                    if ( er.first != er.second )
-                	{
-                	std::cerr << "\nte-debug, loop [" << param.first << "] not found\n";
-                	}
+                   // how to detect an error
 #endif
                     for (auto itm=er.first; itm!=er.second; ++itm)
                 	{
@@ -132,7 +132,10 @@ class Cte
 	    }
 
         /**
-         * @brief Replaces '{{ crsName }}' with value
+         * @brief Replaces '{{ crsName }}' with 'value'
+         *
+         * Deals with repeatable sequences from between enclosing tags like
+         * for-loops
          *
          * @param crsPart A part of the document
          * @param crsName The variables base name
@@ -241,7 +244,7 @@ class Cte
 	 * @param crsPage The input template text
 	 * @param mData The variables to fill in
 	 */
-	std::string FillBlocks(std::string const & crsPage, TMapS2S const & mBlocks) const
+	std::string FillBlocks(std::string const & crsPage, TMapOfBlocks const & mBlocks) const
 	    {
 	    std::ostringstream oss{};
 
@@ -283,9 +286,9 @@ class Cte
 	 *
 	 * @param page The template
 	 */
-	TMapS2S GetBlocks(std::string const & crsPage) const
+	TMapOfBlocks GetBlocks(std::string const & crsPage) const
 	    {
-	    TMapS2S mResult{};
+	    TMapOfBlocks mResult{};
 
 	    std::regex const re(R"(\{\%\s*block\s*|\{\%\s*endblock\s*\%\})");
 	    size_t n{0};
