@@ -83,7 +83,7 @@ class Cte
             {
 
 	    std::smatch      sm{};
-	    std::regex const re(R"(([^\s*]*)\s*in\s*([^\s*]*)\s*\%\})");
+	    std::regex const re(R"(([^\s*]*)\s+in\s+([^\s*]*)\s+\%\})");
 	    std::regex_search(crsFragment, sm, re);
 	    if ( sm.size() > 2 )
 		{
@@ -105,7 +105,7 @@ class Cte
 
 	    std::ostringstream oss{};
 
-	    std::regex const re(R"(\{\%\s*for\s*|\{\%\s*endfor\s*\%\})");
+	    std::regex const re(R"(\{\%\s+for\s+|\{\%\s+endfor\s+\%\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -147,7 +147,7 @@ class Cte
             {
 	    std::ostringstream oss{};
 
-	    std::regex const re(R"(\{\{[^\{]\s*|\s*[^\}]\}\})");
+	    std::regex const re(R"(\{{2}\s+|\s+\}{2})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPart.begin(), crsPart.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -198,7 +198,7 @@ class Cte
 	    {
 	    std::ostringstream oss{};
 
-	    std::regex const re(R"(\{\{[^\{]\s*|\s*[^\}]\}\})");
+	    std::regex const re(R"(\{{2}\s+|\s+\}{2})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -248,7 +248,7 @@ class Cte
 	    {
 	    std::ostringstream oss{};
 
-	    std::regex const re(R"(\{\%\s*block\s*|\{\%\s*endblock\s*\%\})");
+	    std::regex const re(R"(\{\%\s+block\s+|\{\%\s+endblock\s+\%\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -290,7 +290,7 @@ class Cte
 	    {
 	    TMapOfBlocks mResult{};
 
-	    std::regex const re(R"(\{\%\s*block\s*|\{\%\s*endblock\s*\%\})");
+	    std::regex const re(R"(\{\%\s+block\s+|\{\%\s+endblock\s+\%\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
@@ -317,7 +317,7 @@ class Cte
 	    {
 	    std::ostringstream oss{};
 
-	    std::regex const re(R"(\{\%\s*if\s*|\{\%\s*endif\s*\%\})");
+	    std::regex const re(R"(\{\%\s+if\s+|\{\%\s+endif\s+\%\})");
 	    size_t n{0};
 	    for (auto it = std::sregex_token_iterator(crsPage.begin(), crsPage.end(), re, -1); it != std::sregex_token_iterator(); ++it)
 		{
