@@ -1,3 +1,3 @@
 [submodule "cute"]
 	path = cute
-	url = git@github.com:PeterSommerlad/CUTE.git
+	url = https://github.com/PeterSommerlad/CUTE.git
