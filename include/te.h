@@ -42,7 +42,7 @@ class Cte
 	    sTemplate = FillVariables(sTemplate, mData);
 
 	    std::smatch      sm{};
-	    std::regex const re(R"(\{\%\sTemplate*extends\sTemplate*\"(.*)\"\sTemplate*\%\})");
+	    std::regex const re(R"e(\{\%\s+extends\s+\"(.*)\"\s+\%\})e");
 	    std::string      sExtend{};
 	    std::regex_search(sTemplate, sm, re);
 	    if ( sm.size() > 1 )

@@ -34,7 +34,19 @@ namespace test_suite
     };
     ASSERT_EQUAL(
       "replacement1replacement2",
-      perform_replacement(oData, "{% for variable in x %}{{ variable }}{% endif %}")
+      perform_replacement(oData, "{% for variable in x %}{{ variable }}{% endfor %}")
+    );
+    }
+
+  void test_for_loop_with_variable_present_wrong_cycle()
+    {
+    auto oData = TRenderData{
+        {"variable", {{"", "replacement1"}}},
+        {"variable", {{"", "replacement2"}}},
+    };
+    ASSERT_EQUAL(
+      "replacement1replacement2",
+      perform_replacement(oData, "{% for variable in x %}{{ variable }}{% endif %} overlap")
     );
     }
 
@@ -46,7 +58,7 @@ namespace test_suite
     };
     ASSERT_EQUAL(
       "replacement1 is A. replacement2 is B. ",
-      perform_replacement(oData, "{% for variable in x %}{{ variable }} is {{ variable.is }}. {% endif %}")
+      perform_replacement(oData, "{% for variable in x %}{{ variable }} is {{ variable.is }}. {% endfor %}")
     );
     }
 
@@ -95,6 +107,7 @@ namespace test_suite
       CUTE(test_if_statement_with_variable_present),
       CUTE(test_if_statement_without_variable_present),
       CUTE(test_for_loop_with_variable_present),
+      CUTE(test_for_loop_with_variable_present_wrong_cycle),
       CUTE(test_for_loop_with_variable_multiple_level_present),
       CUTE(test_for_loop_with_variable_present_and_surrounding_context),
       CUTE(test_for_loop_with_variable_present_and_surrounding_context_TeX),
